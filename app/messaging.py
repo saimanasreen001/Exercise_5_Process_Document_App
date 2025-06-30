@@ -1,6 +1,4 @@
-from queue import Queue
-from threading import Thread
-import time
+import asyncio
 
 
 class MessageBroker:
@@ -9,19 +7,19 @@ class MessageBroker:
 
     def create_topic(self, topic_name):
         if topic_name not in self.topics:
-            self.topics[topic_name] = Queue()
+            self.topics[topic_name] = asyncio.Queue()
 
-    def publish(self, topic_name, message):
+    async def publish(self, topic_name, message):
         if topic_name in self.topics:
-            self.topics[topic_name].put(message)
+            await self.topics[topic_name].put(message)
 
     def subscribe(self, topic_name, handler):
-        def listen():
+        async def listen():
             while True:
-                message = self.topics[topic_name].get()
-                handler(message)
+                message = await self.topics[topic_name].get()
+                await handler(message)
 
-        Thread(target=listen, daemon=True).start()
+        asyncio.create_task(listen())
 
 
 broker = MessageBroker()

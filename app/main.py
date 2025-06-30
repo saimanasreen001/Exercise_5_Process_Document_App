@@ -22,7 +22,7 @@ async def startup_event():
     # Tables are created during Postgres Setup on DBeaver.
 
     # Start background subscriber
-    start_subscriber()
+    await start_subscriber()
     print("Background subscriber started")
 
 

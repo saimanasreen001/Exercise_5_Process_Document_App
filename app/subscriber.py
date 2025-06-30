@@ -2,7 +2,7 @@ from app.messaging import broker
 from app.message_processor import process_document
 
 
-def start_subscriber():
+async def start_subscriber():
     """
     Start the background subscriber to process uploaded documents
     """

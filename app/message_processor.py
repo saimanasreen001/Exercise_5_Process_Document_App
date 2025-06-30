@@ -1,12 +1,14 @@
 import uuid
 import PyPDF2
 import os
+import asyncio
+import aiofiles
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models import DocumentData
 
 
-def process_document(message):
+async def process_document(message):
     """
     TODO: Implement document processing logic
     - Extract file_path and original_name from message
@@ -32,7 +34,7 @@ def process_document(message):
     print(f"[Worker] Completed processing: {original_name}")
 
 
-def read_file_content(file_path):
+async def read_file_content(file_path):
     """
     TODO: Implement file reading logic
     - Support PDF files using PyPDF2
@@ -40,7 +42,7 @@ def read_file_content(file_path):
     """
 
 
-def chunk_content(content):
+async def chunk_content(content):
     """
     TODO: Implement content chunking logic
     - Split content into paragraphs or pages
@@ -50,7 +52,7 @@ def chunk_content(content):
     pass  # TODO: Implement content chunking logic
 
 
-def store_chunks_in_db(chunks, document_name, role):
+async def store_chunks_in_db(chunks, document_name, role):
     """
     TODO: Implement database storage logic
     - Create database session

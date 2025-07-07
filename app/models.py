@@ -14,11 +14,13 @@ class DocumentData(Base):
     chunk_number = Column(Integer, nullable=False)
     chunk_content = Column(Text, nullable=False)
     role = Column(Text, nullable=False)
+    keywords=Column(Text,nullable=False)
+    summary=Column(Text,nullable=False)
 
 
 class UserRoleMap(Base):
     __tablename__ = "user_role_map"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)# id is automatically generated
     user = Column(Text, nullable=False)
     role = Column(Text, nullable=False)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#Entry point to run FastAPI server.
 """
 Simple script to run the Document Processor API
 """

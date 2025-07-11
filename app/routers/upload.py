@@ -1,19 +1,23 @@
+# check run.py for the files flow.
+
 #Deals with uploading files.
 
-from fastapi import APIRouter, UploadFile, File, Form
-import shutil
-import os
-import uuid
-from app.messaging import broker
-import config
+# APIRouter creates modular, reusable API routes
+# UploadFile handles uploaded files
+from fastapi import APIRouter, UploadFile, File, Form 
+import shutil # used for copying, moving and deleting files
+import os # interacts with the operating system
+import uuid # generates universally unique identifiers
+from app.messaging import broker 
+import config # imports config.py
 
 router = APIRouter()
 
 # Route for uploading files.
 @router.post("/upload", status_code=201)
 async def upload_document(
-    file: UploadFile = File(...), role: str = Form(default="Default Role")
-):
+    file: UploadFile = File(...), role: str = Form(default="Default Role")):# while accessing upload route, 
+    #file is uploaded and role is given an input i.e which role has uploaded the file
     """
     TODO: Implement file upload logic
     - Create unique file name using uuid
@@ -31,11 +35,11 @@ async def upload_document(
         upload_dir=getattr(config,"UPLOAD_DIR","uploads")
         os.makedirs(upload_dir,exist_ok=True)
 
-        #Save the file to disk.
-        file_path=os.path.join(upload_dir,filename)
+        # creates file path "uploads/file_name"
+        file_path=os.path.join(upload_dir,filename) 
 
         #Opens the file and writes content from the uploaded file to 
-        # save the uploaded file locally to the disk.
+        # save the uploaded file locally to the disk to "uploads/file_name"
         with open(file_path,"wb") as buffer:
             shutil.copyfileobj(file.file,buffer)
 
@@ -45,12 +49,12 @@ async def upload_document(
         # Use: await broker.publish("doc_uploaded", message)
 
         message={
-            "file_path":file_path,
-            "original_name":filename,
-            "role":role
+            "file_path":file_path, #directory path
+            "original_name":filename, #uuid filename
+            "role":role # who has uploaded the file.
             }
 
-        #sends mssg to the internal mssg queue.
+        #sends mssg to the internal mssg queue. message is published to the topic "doc_uploaded"
         await broker.publish("doc_uploaded",message) # self is automatically passed
 
         # message is published.
@@ -58,11 +62,11 @@ async def upload_document(
         #         {
         #     "file_path": "/uploads/uuid_filename.pdf",
         #     "original_name": "original_filename.pdf",
-        #     "role": "Analyst"
+        #     "role": "Admin"
         # }
 
-        #message on the client side.
-        #the role who has uploaded the file. Only those roles can access the uploaded doc.
+        # JSON response on Swagger UI
+        # the role who has uploaded the file. Only those roles can access the uploaded doc.
         return {
             "message": "File uploaded and queued for processing",
             "file_path": file_path,  # TODO: file_path

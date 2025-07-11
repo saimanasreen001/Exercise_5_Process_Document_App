@@ -1,14 +1,10 @@
-import uuid
-import PyPDF2
-import os
-import asyncio
-import aiofiles
-from sqlalchemy.orm import Session
+import PyPDF2 # extracts text from a pdf file
+from sqlalchemy.orm import Session # used to create a db session
 from app.database import SessionLocal
-from app.models import DocumentData
-from app.ollama_client import ask_ollama
+from app.models import DocumentData # consists of document_data table
+from app.ollama_client import ask_ollama # asks llm to get response
 
-async def process_document(message):
+async def process_document(message): # message which is published to the topic in upload.py is now passed here.
     """
     TODO: Implement document processing logic
     - Extract file_path and original_name from message
@@ -18,7 +14,8 @@ async def process_document(message):
     """
 
     # These keys should be present in the message while publishing the message to the topic.
-    file_path = message["file_path"]
+    # extracts from the message
+    file_path = message["file_path"] 
     original_name = message["original_name"]
     role = message["role"]
 
@@ -83,21 +80,21 @@ async def store_chunks_in_db(chunks, document_name, role):
     - For each chunk, create DocumentData record with chunk_number
     - Commit to database
     """
-    db:Session=SessionLocal()
-    for idx,chunk in enumerate(chunks):
+    db:Session=SessionLocal() # creates db session.
+    for idx,chunk in enumerate(chunks): # keywords are generated from text chunks
         # Generate keywords
-        keywords_prompt = (
-            "Extract exactly 5 keywords from this text. "
+        keywords_prompt = ( # prompt to extract keywords from the chunk
+            "Extract exactly 5 keywords from the current chunk. "
             "Return only the keywords, separated by commas, all in lowercase, no numbering, no extra text:\n"
             f"{chunk}"
         )       
-        keywords=ask_ollama(keywords_prompt).strip()
+        keywords=ask_ollama(keywords_prompt).strip() # keywords generated and stored
 
-         # Generate summary
+         # Generate summary of current chunk
         summary_prompt = f"Summarize this text in 1 sentence. Return only the summary sentence:{chunk}"
-        summary = ask_ollama(summary_prompt)
+        summary = ask_ollama(summary_prompt) # summary generated
 
-        doc_data=DocumentData(
+        doc_data=DocumentData( # records are created inside document_data table.
             document_name=document_name,
             chunk_number=idx+1,
             chunk_content=chunk,
@@ -105,6 +102,6 @@ async def store_chunks_in_db(chunks, document_name, role):
             keywords=keywords,
             summary=summary
         )
-        db.add(doc_data)
-    db.commit()
+        db.add(doc_data) # records are added
+    db.commit() # saves all changes.
    
